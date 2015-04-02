@@ -102,6 +102,22 @@ sub head {
     return $response->content;
 }
 
+sub manifest {
+    my $self    = shift;
+    my $manifest = shift;
+    my $deleteafter = shift;
+    my $request = HTTP::Request->new( 'PUT', $self->_url,['X-Auth-Token' => $self->cloudfiles->token,'X-Object-Manifest'=>$manifest ,'Content-Length'=>0]);
+if(defined($deleteafter)) {
+$request = HTTP::Request->new( 'PUT', $self->_url,['X-Auth-Token' => $self->cloudfiles->token,'X-Object-Manifest'=>$manifest ,'Content-Length'=>0,'X-Delete-After'=>$deleteafter]);
+}
+    my $response = $self->cloudfiles->_request($request);
+    confess 'Object ' . $self->name . ' not found' if $response->code == 404;
+ print $response->code;
+    #confess 'Unknown error' unless $response->is_success;
+    #$self->_set_attributes_from_response($response);
+    return $response->content;
+}
+
 sub get {
     my ($self, $force_retrieval) = @_;
     
@@ -263,6 +279,7 @@ my %Supported_headers = (
     'Origin',
     'Access-Control-Request-Method',
     'Access-Control-Request-Headers',
+    'X-Delete-After',
 );
 
 sub _prepare_headers {
